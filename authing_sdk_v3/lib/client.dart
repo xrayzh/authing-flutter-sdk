@@ -580,6 +580,8 @@ class AuthClient {
     map.putIfAbsent('token', () => currentUser?.accessToken);
     final Result result = await post('/oidc/token/revocation', jsonEncode(map));
     currentUser = null;
+    final prefs = await SharedPreferences.getInstance();
+    prefs.remove(keyToken);
     return AuthResult(result);
   }
 
@@ -770,9 +772,10 @@ class AuthClient {
 
   static Future<User?> createUser(Result result) async {
     if (result.statusCode == 200) {
-      currentUser = User.create(result.data);
       final prefs = await SharedPreferences.getInstance();
-      await prefs.setString(keyToken, currentUser!.token);
+      final storedAccessToken = prefs.getString(keyToken);
+      currentUser = User.create(result.data, storedAccessToken);
+      prefs.setString(keyToken, currentUser!.accessToken);
     } else if (result.statusCode == 1636) {
       currentUser = User();
       currentUser!.mfaToken = result.data["mfaToken"];

@@ -40,20 +40,27 @@ class User {
 
   late List customData;
 
-  static User create(Map map) {
+  static User create(Map map, [String? accessToken]) {
     User user = User();
-    user.id = map["id"].toString();
+    user.id = map["userId"].toString();
     if (user.id.isEmpty) {
       user.id = map["sub"].toString();
     }
     user.phone = map["phone"].toString();
     user.email = map["email"].toString();
-    user.token = map["token"].toString();
+
+    if (map.containsKey("token")) {
+      user.token = map["token"].toString();
+    }
     if (map.containsKey("mfaToken")) {
       user.mfaToken = map["mfaToken"].toString();
     }
     if (map.containsKey("access_token")) {
       user.accessToken = map["access_token"].toString();
+    } else if (accessToken != null) {
+      user.accessToken = accessToken;
+    } else {
+      user.accessToken = "null";
     }
     if (map.containsKey("id_token")) {
       user.idToken = map["id_token"].toString();
@@ -86,9 +93,6 @@ class User {
     user.postalCode = map["postalCode"].toString();
     user.city = map["city"].toString();
     user.province = map["province"].toString();
-    if (map.containsKey("token")) {
-      user.token = map["token"].toString();
-    }
     user.country = map["country"].toString();
     return user;
   }
